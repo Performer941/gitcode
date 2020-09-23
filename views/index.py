@@ -1,6 +1,7 @@
 from . import index_blu
+from flask import render_template
 
 
 @index_blu.route("/")
 def index():
-    return "我是主页...new"
+    return render_template("index.html")
