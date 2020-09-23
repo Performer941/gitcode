@@ -224,7 +224,8 @@ function generateImageCode() {
     imageCodeId = generateUUID();
 
     // 2. 拼接验证码地址
-    var imageCodeUrl = "/passport/image_code?code_id=" + imageCodeId;
+    // var imageCodeUrl = "/passport/image_code?code_id=" + imageCodeId;
+    var imageCodeUrl = "/static/index/images/pic_code.png"
     // 3. 设置页面中图片验证码img标签的src属性
     $(".get_pic_code").attr("src", imageCodeUrl)
 }

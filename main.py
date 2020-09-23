@@ -2,14 +2,14 @@ from flask import Flask
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from utils.common import show_top_6_news_style
-from views import index_blu
+from views import index_blu, passport_blu
 from models import db
 
 app = Flask(__name__)
 app.config.from_pyfile("config.ini")
 # 创建蓝图，且注册到app
 app.register_blueprint(index_blu)
-
+app.register_blueprint(passport_blu)
 db.init_app(app)
 # 添加数据库迁移等工具
 manager = Manager(app)
