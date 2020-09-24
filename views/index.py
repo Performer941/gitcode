@@ -47,8 +47,14 @@ def detail(news_id):
     # 根据news_id查询这个新闻的详情
     news = db.session.query(News).filter(News.id == news_id).first()
 
+    # 查询这个新闻的作者
+    news_author = news.user
+    news_author.news_num = news_author.news.count()
+    news_author.follwer_num = news_author.followers.count()
+
     # 查询用户是否已经登录
     user_id = session.get("user_id", 0)
     nick_name = session.get("nick_name", "")
 
-    return render_template("detail.html", news=news, nick_name=nick_name)
+    return render_template("detail.html", news=news, nick_name=nick_name, news_author=news_author)
+

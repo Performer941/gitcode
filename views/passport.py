@@ -118,4 +118,3 @@ def image_code():
     resp.headers['Content-Type'] = 'image/png'
 
     return resp
-# git commit -m '完成注册页面的验证码以及判断验证码是否正确'
