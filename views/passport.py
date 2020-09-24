@@ -1,4 +1,4 @@
-from flask import request, jsonify, session, redirect, url_for
+from flask import request, jsonify, session, redirect, url_for, make_response
 
 from models import db
 from models.index import User
@@ -17,6 +17,14 @@ def register():
     # 2. 测试数据
     print(mobile, password, image_code, smscode)
 
+    # 验证图片验证码是否争取
+    if session.get("image_code") != image_code:
+        ret = {
+            "errno": 1003,
+            "errmsg": "重新输入验证码"
+        }
+        return jsonify(ret)
+
     # 2. 创建一个新的用户
     # 2.1 先查询是否有这个相同的用户
     if db.session.query(User).filter(User.mobile == mobile).first():
@@ -29,7 +37,7 @@ def register():
     # 将新用户的数据插入到数据库
     user = User()
     user.nick_name = mobile
-    user.password_hash = password  # 在第2版中会进行更改，到时会变成加密的
+    user.password_hash = password
     user.mobile = mobile
     try:
         db.session.add(user)
@@ -83,3 +91,31 @@ def logout():
     session.clear()
 
     return redirect(url_for('index_blu.index'))
+
+
+@passport_blu.route("/passport/image_code")
+def image_code():
+    # 读取一个图片
+    # with open("./yanzhengma.png", "rb") as f:
+    #     image = f.read()
+
+    # 真正的生成一张图片数据
+    from utils.captcha.captcha import captcha
+
+    # 生成验证码
+    # hash值  验证码值  图片内容
+    name, text, image = captcha.generate_captcha()
+
+    print("刚刚生成的验证码：", text)
+
+    # 通过session的方式，缓存刚刚生成的验证码，否则注册时不知道刚刚生成的是多少
+    session['image_code'] = text
+
+    # 返回响应内容
+    resp = make_response(image)
+
+    # 设置内容类型
+    resp.headers['Content-Type'] = 'image/png'
+
+    return resp
+# git commit -m '完成注册页面的验证码以及判断验证码是否正确'

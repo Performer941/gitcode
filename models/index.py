@@ -20,6 +20,7 @@ class News(db.Model):
     update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)  # 记录的更新时间
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
 
+
     category = db.relationship('Category', backref='news')
 
     def to_dict(self):
