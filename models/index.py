@@ -6,7 +6,8 @@ from . import db
 class News(db.Model):
     """新闻"""
     __tablename__ = "news"
-
+    
+    # 数据表字段
     id = db.Column(db.Integer, primary_key=True)  # 新闻编号
     title = db.Column(db.String(256), nullable=False)  # 新闻标题
     source = db.Column(db.String(64), nullable=False)  # 新闻来源
@@ -21,8 +22,6 @@ class News(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))  # 当前新闻的作者id
     user = db.relationship('User', backref=db.backref('news', lazy='dynamic'))
-
-
     category = db.relationship('Category', backref='news')
 
     def to_dict(self):

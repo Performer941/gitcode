@@ -18,7 +18,7 @@ def register():
     print(mobile, password, image_code, smscode)
 
     # 验证图片验证码是否争取
-    if session.get("image_code") != image_code:
+    if session.get("image_code").lower() != image_code.lower():
         ret = {
             "errno": 1003,
             "errmsg": "重新输入验证码"
