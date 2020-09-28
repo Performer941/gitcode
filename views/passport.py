@@ -1,11 +1,10 @@
 from flask import request, jsonify, session, redirect, url_for, make_response
-
+from . import passport_blu
 from models import db
 from models.index import User
 
-from . import passport_blu
 
-
+# 注册功能
 @passport_blu.route("/passport/register", methods=["GET", "POST"])
 def register():
     # 1. 提取数据
@@ -61,6 +60,7 @@ def register():
     return jsonify(ret)
 
 
+# 登录功能
 @passport_blu.route("/passport/login", methods=["GET", "POST"])
 def login():
     # 1. 提取登录时的用户名，密码
@@ -85,6 +85,7 @@ def login():
     return jsonify(ret)
 
 
+# 退出功能
 @passport_blu.route("/passport/logout")
 def logout():
     # 清空登录状态
@@ -93,6 +94,7 @@ def logout():
     return redirect(url_for('index_blu.index'))
 
 
+# 生成验证码功能
 @passport_blu.route("/passport/image_code")
 def image_code():
     # 读取一个图片

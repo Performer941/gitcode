@@ -1,22 +1,25 @@
 from flask import render_template, jsonify, request, session
-
-from models import db
-from models.index import News
-
 from . import index_blu
+from models import db
+from models.index import News, User
 
 
+# 显示新闻页的热点新闻
 @index_blu.route("/")
 def index():
     # 查询点击量最多的前6个新闻信息
     clicks_top_6_news = db.session.query(News).order_by(-News.clicks).limit(6)
     # 查询用户是否已经登录
     user_id = session.get("user_id", 0)
-    nick_name = session.get("nick_name", "")
+    if user_id:
+        nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
+    else:
+        nick_name = session.get("nick_name", "")
 
     return render_template("index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name)
 
 
+# 从数据库返回主页面新闻数据
 @index_blu.route("/newslist")
 def category_news():
     # 1. 获取前端传递过来的数据，就是提取 URL中的数据
@@ -42,6 +45,7 @@ def category_news():
     return jsonify(ret)
 
 
+# 新闻详情页
 @index_blu.route("/detail/<int:news_id>")
 def detail(news_id):
     # 根据news_id查询这个新闻的详情
@@ -54,7 +58,10 @@ def detail(news_id):
 
     # 查询用户是否已经登录
     user_id = session.get("user_id", 0)
-    nick_name = session.get("nick_name", "")
+    if user_id:
+        nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
+    else:
+        nick_name = session.get("nick_name", "")
 
     # 计算当前登录用户是否已经关注了这个新闻的作者
     news_author_followers_id = [x.id for x in news_author.followers]

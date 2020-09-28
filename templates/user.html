@@ -12,10 +12,10 @@
 <body>
 <div class="header_con">
     <div class="header">
-        <a href="#" class="logo fl"><img src="/static/index/images/logo.png" alt="logo"></a>
+        <a href="/" class="logo fl"><img src="/static/index/images/logo.png" alt="logo"></a>
         <div class="user_login fr" style="display: block;">
             <img src="/static/index/images/user_pic.png" class="lgin_pic">
-            <a href="{{ url_for('user_blu.user_center') }}">{{ nick_name }}</a>
+            <a href="{{ url_for('user_blu.user_center') }}" id="nick_name">{{ nick_name }}</a>
             <a href="{{ url_for('passport_blu.logout') }}">退出</a>
         </div>
     </div>
@@ -30,12 +30,12 @@
 
         <ul class="option_list">
             <li class="active"><a href="/user/user_base_info" target="main_frame">基本资料</a></li>
-            <li><a href="user_pic_info.html" target="main_frame">头像设置</a></li>
-            <li><a href="user_follow.html" target="main_frame">我的关注</a></li>
+            <li><a href="/user/user_pic_info" target="main_frame">头像设置</a></li>
+            <li><a href="/user/user_follow" target="main_frame">我的关注</a></li>
             <li><a href="/user/user_pass_info" target="main_frame">密码修改</a></li>
-            <li><a href="user_collection.html" target="main_frame">我的收藏</a></li>
-            <li><a href="user_news_release.html" target="main_frame">新闻发布</a></li>
-            <li><a href="user_news_list.html" target="main_frame">新闻列表</a></li>
+            <li><a href="/user/user_collection" target="main_frame">我的收藏</a></li>
+            <li><a href="/user/user_news_release" target="main_frame">新闻发布</a></li>
+            <li><a href="/user/user_news_list" target="main_frame">新闻列表</a></li>
         </ul>
     </div>
 

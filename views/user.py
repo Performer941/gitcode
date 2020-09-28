@@ -4,6 +4,7 @@ from models.index import User, Follow
 from models import db
 
 
+# 用户关注功能
 @user_blu.route("/user/follow", methods=["POST"])
 def follow():
     action = request.json.get("action")
@@ -52,7 +53,8 @@ def follow():
     else:
         # 取消关注
         try:
-            follow = db.session.query(Follow).filter(Follow.followed_id == news_author_id, Follow.follower_id == user_id).first()
+            follow = db.session.query(Follow).filter(Follow.followed_id == news_author_id,
+                                                     Follow.follower_id == user_id).first()
             db.session.delete(follow)
             db.session.commit()
 
@@ -75,9 +77,11 @@ def follow():
     return jsonify(ret)
 
 
+# 防止未登录用户查看信息
 @user_blu.route("/user/center")
 def user_center():
-    nick_name = session.get("nick_name")
+    user_id = session.get("user_id")
+    nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
 
     # 如果用户未登录，禁止访问用户中心
     if not nick_name:
@@ -86,11 +90,13 @@ def user_center():
     return render_template("user.html", nick_name=nick_name)
 
 
+# 显示修改用户信息视图
 @user_blu.route("/user/user_base_info")
 def user_base_info():
     return render_template("user_base_info.html")
 
 
+# 修改用户信息功能
 @user_blu.route("/user/basic", methods=["POST"])
 def user_basic():
     # 获取用户的新的信息
@@ -100,7 +106,6 @@ def user_basic():
 
     # 获取当前用户的信息
     user_id = session.get("user_id")
-
     # 存储到数据库
     user = db.session.query(User).filter(User.id == user_id).first()
     if not user:
@@ -126,12 +131,13 @@ def user_basic():
     return jsonify(ret)
 
 
+# 显示修改用户密码视图
 @user_blu.route("/user/user_pass_info")
 def user_pass_info():
-
     return render_template("user_pass_info.html")
 
 
+# 显示修改用户密码功能
 @user_blu.route("/user/password", methods=["POST"])
 def user_password():
     # 1. 提取旧密码以及新密码
@@ -167,3 +173,48 @@ def user_password():
     # 4. 返回json
     return jsonify(ret)
 
+
+# 显示修改用户头像视图
+@user_blu.route("/user/user_pic_info")
+def user_pic_info():
+    return render_template("user_pic_info.html")
+
+
+# 修改用户头像功能
+@user_blu.route("/user/avatar", methods=["POST"])
+def user_avatar():
+    # 1.提取新头像
+    avatar = request.json.get(user_avatar)
+
+    # 2. 提取当前用户的id
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({
+            "errno": 4001,
+            "errmsg": "请先登录"
+        })
+
+
+
+# 显示用户查看粉丝视图
+@user_blu.route("/user/user_follow")
+def user_follow():
+    return render_template("user_follow.html")
+
+
+# 显示用户查看我的收藏视图
+@user_blu.route("/user/user_collection")
+def user_collection():
+    return render_template("user_collection.html")
+
+
+# 显示新闻发布视图
+@user_blu.route("/user/user_news_release")
+def user_news_release():
+    return render_template("user_news_release.html")
+
+
+# 显示新闻列表视图
+@user_blu.route("/user/user_news_list")
+def user_news_list():
+    return render_template("user_news_list.html")
