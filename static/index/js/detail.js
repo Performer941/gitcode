@@ -372,10 +372,12 @@ $(function(){
                     var count = $(".follows b").html();
                     $(".follows b").html(parseInt(count)+1);
                 }
+
                 else if (resp.errno == "3002") {
                     // 用户未登录
                     $(".login_form_con").show();
                 }
+
                 else {
                     // `关注`失败
                     alert(resp.errmsg);
@@ -414,10 +416,12 @@ $(function(){
                     var count = $(".follows b").html();
                     $(".follows b").html(parseInt(count)-1);
                 }
+
                 else if (resp.errno == "3002") {
                     // 用户未登录
                     $(".login_form_con").show();
                 }
+
                 else {
                     // `关注`失败
                     alert(resp.errmsg);
