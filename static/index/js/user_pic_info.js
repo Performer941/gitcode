@@ -17,6 +17,7 @@ $(function () {
             headers: {
                 'X-CSRFToken': getCookie('csrf_token')
             },
+
             success: function (resp) {
                 if (resp.errno == '0') {
                     // `上传头像`成功

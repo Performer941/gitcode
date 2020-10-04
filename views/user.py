@@ -2,7 +2,8 @@ from . import user_blu
 from flask import jsonify, session, request, render_template, redirect, url_for
 from models.index import User, Follow
 from models import db
-
+from PIL import Image
+import os
 
 # 用户关注功能
 @user_blu.route("/user/follow", methods=["POST"])
@@ -184,16 +185,60 @@ def user_pic_info():
 @user_blu.route("/user/avatar", methods=["POST"])
 def user_avatar():
     # 1.提取新头像
-    avatar = request.json.get(user_avatar)
+    new_avatar = request.files.get("avatar")
+    # 获取用户id
+    user_id = session.get('user_id')
 
-    # 2. 提取当前用户的id
-    user_id = session.get("user_id")
-    if not user_id:
+    # 判断是否接收到新图片
+    if new_avatar:
+        # 如果存在用Image打开新图片
+        img = Image.open(new_avatar)
+        # 根据session获取的用户id，从数据库匹配并获取用户
+        user = db.session.query(User).filter(User.id == user_id).first()
+        # 添加图片路径文件夹
+        img_path = './static/index/images/user_avatar/' + str(user.id)
+        # 判断图片路径是否存在
+        user_img = os.path.exists(img_path)
+        # 如果不存在
+        if not user_img:
+            # 创建该路径文件夹
+            os.mkdir(img_path)
+        # 将该图片命名并存放到指定路径
+        img.save(img_path + '/user_imgs.png')
+        # 将该用户的头像路径更改为该图片路径
+        user.avatar_url = img_path + '/user_imgs.png'
+        # 提交到数据库
+        db.session.commit()
+
         return jsonify({
-            "errno": 4001,
-            "errmsg": "请先登录"
+                 "errno": 0,
+                 "errmsg": "修改成功"
+             })
+
+    else:
+        return jsonify({
+                "errno": 4005,
+                "errmsg": "修改失败"
         })
 
+
+# 获取用户头像
+@user_blu.route("/user/img_path", methods=["GET", "POST"])
+def img_path():
+    # 从session获取用户id
+    user_id = session.get('user_id')
+    # # 根据session获取的用户id，从数据库匹配并获取用户
+    user = db.session.query(User).filter(User.id == user_id).first()
+    # 如果该用户已上传头像，打开用户头像，读取
+    if user.avatar_url:
+        with open(user.avatar_url, 'rb') as f:
+            img = f.read()
+    # 如果用户未上传头像信息，返回默认头像
+    else:
+        with open('./static/index/images/user_pic.png', 'rb') as f:
+            img = f.read()
+
+    return img
 
 
 # 显示用户查看粉丝视图
