@@ -1,15 +1,9 @@
-function getCookie(name) {
-    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-    return r ? r[1] : undefined;
-}
-
-
 $(function () {
 
-  $(".focused").click(function () {
+  $(".focus").click(function () {
         // 获取参数
         var user_id = $(this).attr("data-user-id");
-        var action = "undo";
+        var action = "do";
 
         // 组织参数
         var params = {

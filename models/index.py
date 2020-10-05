@@ -54,7 +54,7 @@ class Follow(db.Model):
     """用关注表"""
     __tablename__ = "follow"
     followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)  # 被关注人的id
-    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)  # 被粉丝id
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)  # 粉丝id
 
 
 class User(db.Model):

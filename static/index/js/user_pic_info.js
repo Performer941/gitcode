@@ -20,6 +20,7 @@ $(function () {
 
             success: function (resp) {
                 if (resp.errno == '0') {
+                    alert(resp.errmsg)
                     // `上传头像`成功
                     // 获取上传头像的完整的url地址
                     var avatar_url = resp.avatar_url;
@@ -28,6 +29,7 @@ $(function () {
                     // 设置父窗口中用户头像img的src属性
                     $(".user_center_pic>img", parent.document).attr("src", avatar_url);
                     $(".user_login>img", parent.document).attr("src", avatar_url);
+                    location.reload()
                 }
                 else {
                     // `上传头像`失败

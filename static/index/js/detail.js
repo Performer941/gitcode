@@ -371,6 +371,7 @@ $(function(){
                     // 设置页面上作者粉丝数量
                     var count = $(".follows b").html();
                     $(".follows b").html(parseInt(count)+1);
+
                 }
 
                 else if (resp.errno == "3002") {

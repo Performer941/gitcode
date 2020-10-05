@@ -5,6 +5,7 @@ from models import db
 from PIL import Image
 import os
 
+
 # 用户关注功能
 @user_blu.route("/user/follow", methods=["POST"])
 def follow():
@@ -209,16 +210,19 @@ def user_avatar():
         user.avatar_url = img_path + '/user_imgs.png'
         # 提交到数据库
         db.session.commit()
+        session['avatar_url'] = img_path
 
         return jsonify({
-                 "errno": 0,
-                 "errmsg": "修改成功"
-             })
+
+            "errno": 0,
+            "avatar_url": "/user/img_path",
+            "errmsg": "修改成功"
+        })
 
     else:
         return jsonify({
-                "errno": 4005,
-                "errmsg": "修改失败"
+            "errno": 4005,
+            "errmsg": "修改失败"
         })
 
 
@@ -227,7 +231,7 @@ def user_avatar():
 def img_path():
     # 从session获取用户id
     user_id = session.get('user_id')
-    # # 根据session获取的用户id，从数据库匹配并获取用户
+    # 根据session获取的用户id，从数据库匹配并获取用户
     user = db.session.query(User).filter(User.id == user_id).first()
     # 如果该用户已上传头像，打开用户头像，读取
     if user.avatar_url:
@@ -241,10 +245,25 @@ def img_path():
     return img
 
 
-# 显示用户查看粉丝视图
+# 显示用户查看粉丝及功能
 @user_blu.route("/user/user_follow")
 def user_follow():
-    return render_template("user_follow.html")
+    # 获取用户id
+    user_id = session.get("user_id")
+    # 根据session获取的用户id，从数据库匹配并获取用户
+    user = db.session.query(User).filter(User.id == user_id).first()
+    # 获取当前需要的页数
+    page = int(request.args.get("page", 1))
+    # 创建分页器对象
+    paginate = user.followers.paginate(page, 2, False)
+    # 创建一个关注我的人的列表
+    user_followed = []
+
+    for followed in user.followed:
+        user_followed.append(followed.id)
+
+
+    return render_template("user_follow.html", paginate=paginate, user_followed=user_followed)
 
 
 # 显示用户查看我的收藏视图

@@ -21,7 +21,7 @@
             <!-- 用户登录后显示下面，隐藏上面 -->
             <div class="user_login fr">
                 <img src="/user/img_path" class="lgin_pic">
-                <a href="#">{{ nick_name }}</a>
+                <a href="{{ url_for('user_blu.user_center') }}" id="nick_name">{{ nick_name }}</a>
                 <a href="/passport/logout">退出</a>
             </div>
         {% endif %}
@@ -156,8 +156,9 @@
             {% if news_author.can_follow %}
                 <a href="javascript:;" class="focus fr" data-user-id="{{ news_author.id }}">关注</a>
             {% else %}
-                <a href="javascript:;" class="focused fr" data-user-id="{{ news_author.id }}"><span
-                        class="out">已关注</span><span class="over">取消关注</span></a>
+                <a href="javascript:;" class="focused fr" data-user-id="{{ news_author.id }}">
+                    <span class="out">已关注</span><span class="over">取消关注</span>
+                </a>
             {% endif %}
         </div>
         <div class="rank_title">
