@@ -170,6 +170,7 @@ def user_password():
             "errno": 0,
             "errmsg": "修改成功"
         }
+        session.clear()
 
     else:
         ret = {
@@ -198,7 +199,8 @@ def user_avatar():
         file_hash.update((f.filename + time.ctime()).encode("utf-8"))
         file_name = file_hash.hexdigest() + f.filename[f.filename.rfind("."):]
         # 将路径改为static/upload下
-        path_file_name = file_name
+        # path_file_name = file_name
+        path_file_name = 'static/upload' + file_name
         # 用新的随机的名字当做图片的名字
         f.save(path_file_name)
         # 将这个图片上传到七牛云
@@ -212,7 +214,8 @@ def user_avatar():
         db.session.commit()
         ret = {
             "errno": 0,
-            "errmsg": "成功"
+            "errmsg": "成功",
+            "avatar_url": img
         }
     else:
         ret = {
@@ -390,6 +393,6 @@ def user_news_list():
     # 提取页码
     page = int(request.args.get("page", 1))
     # 获取当前用户的所有新闻
-    news_paginate = user.news.paginate(page, 6, False)
+    news_paginate = user.news.paginate(page, 3, False)
 
     return render_template("user_news_list.html", news_paginate=news_paginate)

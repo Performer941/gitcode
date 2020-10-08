@@ -11,12 +11,13 @@ def index():
     clicks_top_6_news = db.session.query(News).order_by(-News.clicks).limit(6)
     # 查询用户是否已经登录
     user_id = session.get("user_id", 0)
+    user = db.session.query(User).filter(User.id == user_id).first()
     if user_id:
         nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
     else:
         nick_name = session.get("nick_name", "")
 
-    return render_template("index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name)
+    return render_template("index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name,user=user)
 
 
 # 从数据库返回主页面新闻数据
@@ -49,7 +50,9 @@ def category_news():
 @index_blu.route("/detail/<int:news_id>")
 def detail(news_id):
     # 根据news_id查询这个新闻的详情
+    user_id = session.get('user_id')
     news = db.session.query(News).filter(News.id == news_id).first()
+    user = db.session.query(User).filter(User.id == user_id).first()
 
     # 查询这个新闻的作者
     news_author = news.user
@@ -77,6 +80,6 @@ def detail(news_id):
     else:
         news.can_collect = True  # 可以收藏
 
-    return render_template("detail.html", news=news, nick_name=nick_name, news_author=news_author)
+    return render_template("detail.html", news=news, nick_name=nick_name, news_author=news_author, user=user)
 
 
