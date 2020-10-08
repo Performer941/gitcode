@@ -1,3 +1,7 @@
+import hashlib
+import time
+
+from utils.image_qiniu import upload_image_to_qiniu
 from . import user_blu
 from flask import jsonify, session, request, render_template, redirect, url_for
 from models.index import User, Follow
@@ -83,13 +87,14 @@ def follow():
 @user_blu.route("/user/center")
 def user_center():
     user_id = session.get("user_id")
-    nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
+    user = db.session.query(User).filter(User.id == user_id).first()
+    nick_name = session.get("nick_name")
 
     # 如果用户未登录，禁止访问用户中心
     if not nick_name:
         return redirect(url_for('index_blu.index'))
 
-    return render_template("user.html", nick_name=nick_name)
+    return render_template("user.html", nick_name=nick_name, user=user)
 
 
 # 显示修改用户信息视图
@@ -176,73 +181,109 @@ def user_password():
     return jsonify(ret)
 
 
-# 显示修改用户头像视图
-@user_blu.route("/user/user_pic_info")
+@user_blu.route("/user/user_pic_info.html")
 def user_pic_info():
-    return render_template("user_pic_info.html")
+    user_id = session.get("user_id")
+    user = db.session.query(User).filter(User.id == user_id).first()
+    return render_template("user_pic_info.html", user=user)
 
 
-# 修改用户头像功能
 @user_blu.route("/user/avatar", methods=["POST"])
 def user_avatar():
-    # 1.提取新头像
-    new_avatar = request.files.get("avatar")
-    # 获取用户id
-    user_id = session.get('user_id')
+    f = request.files.get("avatar")
+    if f:
+        # print(f.filename)
+        # 为了防止多个用户上传的图片名字相同，需要将用户的图片计算出一个随机的用户名，防止冲突
+        file_hash = hashlib.md5()
+        file_hash.update((f.filename + time.ctime()).encode("utf-8"))
+        file_name = file_hash.hexdigest() + f.filename[f.filename.rfind("."):]
+        # 将路径改为static/upload下
+        path_file_name = file_name
+        # 用新的随机的名字当做图片的名字
+        f.save(path_file_name)
+        # 将这个图片上传到七牛云
+        img = upload_image_to_qiniu(path_file_name, file_name)
 
-    # 判断是否接收到新图片
-    if new_avatar:
-        # 如果存在用Image打开新图片
-        img = Image.open(new_avatar)
-        # 根据session获取的用户id，从数据库匹配并获取用户
+        # 修改数据库中用户的头像链接（注意，图片时不放在数据库中的，数据库中存放的图片的名字或者路径加图片名）
+        user_id = session.get("user_id")
         user = db.session.query(User).filter(User.id == user_id).first()
-        # 添加图片路径文件夹
-        img_path = './static/index/images/user_avatar/' + str(user.id)
-        # 判断图片路径是否存在
-        user_img = os.path.exists(img_path)
-        # 如果不存在
-        if not user_img:
-            # 创建该路径文件夹
-            os.mkdir(img_path)
-        # 将该图片命名并存放到指定路径
-        img.save(img_path + '/user_imgs.png')
-        # 将该用户的头像路径更改为该图片路径
-        user.avatar_url = img_path + '/user_imgs.png'
-        # 提交到数据库
+        user.avatar_url = img
+
         db.session.commit()
-        session['avatar_url'] = img_path
-
-        return jsonify({
-
+        ret = {
             "errno": 0,
-            "avatar_url": "/user/img_path",
-            "errmsg": "修改成功"
-        })
-
+            "errmsg": "成功"
+        }
     else:
-        return jsonify({
-            "errno": 4005,
-            "errmsg": "修改失败"
-        })
+        ret = {
+            "errno": 4003,
+            "errmsg": "上传失败"
+        }
 
+    return jsonify(ret)
 
-# 获取用户头像
-@user_blu.route("/user/img_path", methods=["GET", "POST"])
-def img_path():
-    # 从session获取用户id
-    user_id = session.get('user_id')
-    # 根据session获取的用户id，从数据库匹配并获取用户
-    user = db.session.query(User).filter(User.id == user_id).first()
-    # 如果该用户已上传头像，打开用户头像，读取
-    if user.avatar_url:
-        with open(user.avatar_url, 'rb') as f:
-            img = f.read()
-    # 如果用户未上传头像信息，返回默认头像
-    else:
-        with open('./static/index/images/user_pic.png', 'rb') as f:
-            img = f.read()
-
-    return img
+# # 方法二
+# # 修改用户头像功能
+# @user_blu.route("/user/avatar", methods=["POST"])
+# def user_avatar():
+#     # 1.提取新头像
+#     new_avatar = request.files.get("avatar")
+#     # 获取用户id
+#     user_id = session.get('user_id')
+#
+#     # 判断是否接收到新图片
+#     if new_avatar:
+#         # 如果存在用Image打开新图片
+#         img = Image.open(new_avatar)
+#         # 根据session获取的用户id，从数据库匹配并获取用户
+#         user = db.session.query(User).filter(User.id == user_id).first()
+#         # 添加图片路径文件夹
+#         img_path = '/static/index/images/user_avatar/' + str(user.id)
+#         # 判断图片路径是否存在
+#         user_img = os.path.exists(img_path)
+#         # 如果不存在
+#         if not user_img:
+#             # 创建该路径文件夹
+#             os.mkdir(img_path)
+#         # 将该图片命名并存放到指定路径
+#         img.save(img_path + '/user_imgs.png')
+#         # 将该用户的头像路径更改为该图片路径
+#         user.avatar_url = img_path + '/user_imgs.png'
+#
+#         # 提交到数据库
+#         db.session.commit()
+#         session['avatar_url'] = img_path
+#
+#         return jsonify({
+#             "errno": 0,
+#             "avatar_url": "/user/img_path",
+#             "errmsg": "修改成功"
+#         })
+#
+#     else:
+#         return jsonify({
+#             "errno": 4005,
+#             "errmsg": "修改失败"
+#         })
+#
+#
+# # 获取用户头像
+# @user_blu.route("/user/img_path", methods=["GET", "POST"])
+# def img_path():
+#     # 从session获取用户id
+#     user_id = session.get('user_id')
+#     # 根据session获取的用户id，从数据库匹配并获取用户
+#     user = db.session.query(User).filter(User.id == user_id).first()
+#     # 如果该用户已上传头像，打开用户头像，读取
+#     if user.avatar_url:
+#         with open(user.avatar_url, 'rb') as f:
+#             img = f.read()
+#     # 如果用户未上传头像信息，返回默认头像
+#     else:
+#         with open('./static/index/images/user_pic.png', 'rb') as f:
+#             img = f.read()
+#
+#     return img
 
 
 # 显示用户查看粉丝及功能
@@ -262,14 +303,23 @@ def user_follow():
     for followed in user.followed:
         user_followed.append(followed.id)
 
-
     return render_template("user_follow.html", paginate=paginate, user_followed=user_followed)
 
 
 # 显示用户查看我的收藏视图
 @user_blu.route("/user/user_collection")
 def user_collection():
-    return render_template("user_collection.html")
+    # 查询用户
+    user_id = session.get("user_id")
+    user = db.session.query(User).filter(User.id == user_id).first()
+    # 查询用户收藏的文章
+    collection_news = user.collection_news
+    # 获取页码
+    page = int(request.args.get("page", 1))
+    # 查询用户收藏的文章
+    paginate = user.collection_news.paginate(page, 5, False)
+
+    return render_template("user_collection.html", collection_news=collection_news, paginate=paginate)
 
 
 # 显示新闻发布视图
