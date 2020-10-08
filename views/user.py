@@ -4,7 +4,7 @@ import time
 from utils.image_qiniu import upload_image_to_qiniu
 from . import user_blu
 from flask import jsonify, session, request, render_template, redirect, url_for
-from models.index import User, Follow
+from models.index import User, Follow, Category, News
 from models import db
 from PIL import Image
 import os
@@ -222,6 +222,7 @@ def user_avatar():
 
     return jsonify(ret)
 
+
 # # 方法二
 # # 修改用户头像功能
 # @user_blu.route("/user/avatar", methods=["POST"])
@@ -323,12 +324,72 @@ def user_collection():
 
 
 # 显示新闻发布视图
-@user_blu.route("/user/user_news_release")
+@user_blu.route("/user/user_news_release.html")
 def user_news_release():
-    return render_template("user_news_release.html")
+    # 查询出分类name，但不包括最新新闻
+    category_list = db.session.query(Category).filter(Category.id != 1).all()
+    return render_template("user_news_release.html", category_list=category_list)
+
+
+# 新闻发布功能
+@user_blu.route("/user/release", methods=["POST"])
+def new_release():
+    # 获取news表中数据
+    title = request.form.get("title")
+    category = request.form.get("category")
+    digest = request.form.get("digest")
+    content = request.form.get("content")
+    # 获取上传图片地址
+    f = request.files.get("index_image")
+
+    news = News()
+    news.title = title
+    news.category_id = category
+    news.source = "个人发布"
+    news.digest = digest
+    news.content = content
+    news.user_id = session.get("user_id")
+    news.status = 1  # 1表示正在审核
+
+    if f:
+        # 哈希加密
+        file_hash = hashlib.md5()
+        file_hash.update((f.filename + time.ctime()).encode("utf-8"))
+        # 保存用户上传图片
+        file_name = file_hash.hexdigest() + f.filename[f.filename.rfind("."):]
+
+        # 将路径改为static/upload下
+        path_file_name = "./static/upload/" + file_name
+
+        # 用新的随机的名字当做图片的名字
+        f.save(path_file_name)
+
+        # 将这个图片上传到七牛云
+        qiniu_image_url = upload_image_to_qiniu(path_file_name, file_name)
+        news.index_image_url = qiniu_image_url
+
+    db.session.add(news)
+    db.session.commit()
+
+    ret = {
+        "errno": 0,
+        "errmsg": "成功"
+    }
+
+    return jsonify(ret)
 
 
 # 显示新闻列表视图
-@user_blu.route("/user/user_news_list")
+@user_blu.route("/user/user_news_list.html")
 def user_news_list():
-    return render_template("user_news_list.html")
+    # 查询当前用户
+    user_id = session.get("user_id")
+    user = db.session.query(User).filter(User.id == user_id).first()
+    # 获取当前用户的所有新闻
+    # news = user.news
+    # 提取页码
+    page = int(request.args.get("page", 1))
+    # 获取当前用户的所有新闻
+    news_paginate = user.news.paginate(page, 6, False)
+
+    return render_template("user_news_list.html", news_paginate=news_paginate)

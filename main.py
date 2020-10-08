@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
-from utils.common import show_top_6_news_style
+from utils.common import show_top_6_news_style, show_news_status_name, show_news_status_style_name
 from views import index_blu, passport_blu, user_blu, news_blu
 from models import db
 
@@ -25,6 +25,8 @@ manager = Manager(app)
 
 # 添加过滤器
 app.add_template_filter(show_top_6_news_style)
+app.add_template_filter(show_news_status_name)
+app.add_template_filter(show_news_status_style_name)
 
 # 生成migrate对象 用来数据库迁移
 migrate = Migrate(app, db)
