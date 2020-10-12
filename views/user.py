@@ -94,13 +94,13 @@ def user_center():
     if not nick_name:
         return redirect(url_for('index_blu.index'))
 
-    return render_template("user.html", nick_name=nick_name, user=user)
+    return render_template("index/user.html", nick_name=nick_name, user=user)
 
 
 # 显示修改用户信息视图
 @user_blu.route("/user/user_base_info")
 def user_base_info():
-    return render_template("user_base_info.html")
+    return render_template("index/user_base_info.html")
 
 
 # 修改用户信息功能
@@ -141,7 +141,7 @@ def user_basic():
 # 显示修改用户密码视图
 @user_blu.route("/user/user_pass_info")
 def user_pass_info():
-    return render_template("user_pass_info.html")
+    return render_template("index/user_pass_info.html")
 
 
 # 显示修改用户密码功能
@@ -186,7 +186,7 @@ def user_password():
 def user_pic_info():
     user_id = session.get("user_id")
     user = db.session.query(User).filter(User.id == user_id).first()
-    return render_template("user_pic_info.html", user=user)
+    return render_template("index/user_pic_info.html", user=user)
 
 
 @user_blu.route("/user/avatar", methods=["POST"])
@@ -307,7 +307,7 @@ def user_follow():
     for followed in user.followed:
         user_followed.append(followed.id)
 
-    return render_template("user_follow.html", paginate=paginate, user_followed=user_followed)
+    return render_template("index/user_follow.html", paginate=paginate, user_followed=user_followed)
 
 
 # 显示用户查看我的收藏视图
@@ -323,7 +323,7 @@ def user_collection():
     # 查询用户收藏的文章
     paginate = user.collection_news.paginate(page, 5, False)
 
-    return render_template("user_collection.html", collection_news=collection_news, paginate=paginate)
+    return render_template("index/user_collection.html", collection_news=collection_news, paginate=paginate)
 
 
 # 显示新闻发布视图
@@ -331,7 +331,7 @@ def user_collection():
 def user_news_release():
     # 查询出分类name，但不包括最新新闻
     category_list = db.session.query(Category).filter(Category.id != 1).all()
-    return render_template("user_news_release.html", category_list=category_list)
+    return render_template("index/user_news_release.html", category_list=category_list)
 
 
 # 新闻发布功能
@@ -395,4 +395,4 @@ def user_news_list():
     # 获取当前用户的所有新闻
     news_paginate = user.news.paginate(page, 3, False)
 
-    return render_template("user_news_list.html", news_paginate=news_paginate)
+    return render_template("index/user_news_list.html", news_paginate=news_paginate)

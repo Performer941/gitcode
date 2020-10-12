@@ -17,7 +17,7 @@ def index():
     else:
         nick_name = session.get("nick_name", "")
 
-    return render_template("index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name, user=user)
+    return render_template("index/index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name, user=user)
 
 
 # 从数据库返回主页面新闻数据
@@ -90,7 +90,7 @@ def detail(news_id):
         user = db.session.query(User).filter(User.id == user_id).first()
         like_comment = user.like_comment
 
-        return render_template("detail.html", news=news, nick_name=nick_name, news_author=news_author,
+        return render_template("index/detail.html", news=news, nick_name=nick_name, news_author=news_author,
                                clicks_top_6_news=clicks_top_6_news, comments=comments,
                                like_comment=like_comment, user=user)
     else:
