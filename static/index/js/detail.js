@@ -331,6 +331,7 @@ $(function(){
 
                         // 更新页面的新闻评论数量
                         updateCommentCount();
+
                     }
                     else {
                         // `回复评论`失败

@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request, session
 from . import index_blu
 from models import db
-from models.index import News, User
+from models.index import News, User, Comment
 
 
 # 显示新闻页的热点新闻
@@ -17,7 +17,7 @@ def index():
     else:
         nick_name = session.get("nick_name", "")
 
-    return render_template("index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name,user=user)
+    return render_template("index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name, user=user)
 
 
 # 从数据库返回主页面新闻数据
@@ -33,10 +33,14 @@ def category_news():
     # 2. 到数据库中查询数据
     # 如果cid是0，表示要看最新的，如果不是0则按照原来规则查询
     if cid == 0:
-        paginate = db.session.query(News).filter(News.status == 0).order_by(-News.create_time).paginate(page=int(page), per_page=int(per_page), error_out=False)
+        paginate = db.session.query(News).filter(News.status == 0).order_by(-News.create_time).paginate(page=int(page),
+                                                                                                        per_page=int(
+                                                                                                            per_page),
+                                                                                                        error_out=False)
     else:
         cid += 1  # 由于测试数据分类中从0开始，而数据库中是从1开始的，所以用户点击的1实际上是2
-        paginate = db.session.query(News).filter(News.category_id == cid, News.status == 0).order_by(-News.create_time).paginate(page=int(page), per_page=int(per_page), error_out=False)
+        paginate = db.session.query(News).filter(News.category_id == cid, News.status == 0).order_by(
+            -News.create_time).paginate(page=int(page), per_page=int(per_page), error_out=False)
 
     # 3. 准备好要返回给浏览器的数据
     ret = {
@@ -46,13 +50,14 @@ def category_news():
     return jsonify(ret)
 
 
-# 新闻详情页
 @index_blu.route("/detail/<int:news_id>")
 def detail(news_id):
     # 根据news_id查询这个新闻的详情
-    user_id = session.get('user_id')
     news = db.session.query(News).filter(News.id == news_id).first()
-    user = db.session.query(User).filter(User.id == user_id).first()
+
+    # 查询点击量最多的前6个新闻信息
+    clicks_top_6_news = db.session.query(News).order_by(-News.clicks).limit(6)
+
 
     # 查询这个新闻的作者
     news_author = news.user
@@ -61,25 +66,32 @@ def detail(news_id):
 
     # 查询用户是否已经登录
     user_id = session.get("user_id", 0)
+    nick_name = session.get("nick_name", "")
+
     if user_id:
-        nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
+        # 计算当前登录用户是否已经关注了这个新闻的作者
+        news_author_followers_id = [x.id for x in news_author.followers]
+        if user_id in news_author_followers_id:
+            news_author.can_follow = False  # 已经关注了作者，就不能在关注了
+        else:
+            news_author.can_follow = True  # 可以关注
+
+        # 计算当前用户是否收藏了这个篇文章
+        news_collected_user_id = [x.id for x in news.collected_user]
+        if user_id in news_collected_user_id:
+            news.can_collect = False  # 已经收藏了，就不要在收藏了
+        else:
+            news.can_collect = True  # 可以收藏
+
+        # 获取评论
+        comments = news.comments.order_by(-Comment.create_time)
+
+        # 获取用户对象
+        user = db.session.query(User).filter(User.id == user_id).first()
+        like_comment = user.like_comment
+
+        return render_template("detail.html", news=news, nick_name=nick_name, news_author=news_author,
+                               clicks_top_6_news=clicks_top_6_news, comments=comments,
+                               like_comment=like_comment, user=user)
     else:
-        nick_name = session.get("nick_name", "")
-
-    # 计算当前登录用户是否已经关注了这个新闻的作者
-    news_author_followers_id = [x.id for x in news_author.followers]
-    if user_id in news_author_followers_id:
-        news_author.can_follow = False  # 已经关注了作者，就不能在关注了
-    else:
-        news_author.can_follow = True  # 可以关注
-
-    # 计算当前用户是否收藏了这个篇文章
-    news_collected_user_id = [x.id for x in news.collected_user]
-    if user_id in news_collected_user_id:
-        news.can_collect = False  # 已经收藏了，就不要在收藏了
-    else:
-        news.can_collect = True  # 可以收藏
-
-    return render_template("detail.html", news=news, nick_name=nick_name, news_author=news_author, user=user)
-
-
+        return '请先登录'

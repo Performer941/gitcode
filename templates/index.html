@@ -91,7 +91,7 @@
         </div>
         <ul class="rank_list">
             {% for news in clicks_top_6_news %}
-                <li><span class="{{ loop.index | show_top_6_news_style}}">{{ loop.index }}</span><a href="#">{{ news.title }}</a></li>
+                <li><span class="{{ loop.index | show_top_6_news_style}}">{{ loop.index }}</span><a href="/detail/{{ news.id }}">{{ news.title }}</a></li>
 {#                {% if loop.index == 1 %}#}
 {#                    <li><span class="first">{{ loop.index }}</span><a href="#">{{ news.title }}</a></li>#}
 {#                {% elif loop.index == 2 %}#}
