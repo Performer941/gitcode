@@ -1,13 +1,59 @@
 from . import admin_blu
 from models import db
 from models.index import User, Category, News
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, redirect, url_for, session
 
 
 # 主页面
 @admin_blu.route('/admin/index.html')
 def admin_index():
-    return render_template("admin/index.html")
+    user_id = session.get("user_id", 0)
+    user = db.session.query(User).filter(User.id == user_id).first()
+    if user:
+        return render_template("admin/index.html", user=user)
+    else:
+        return render_template("admin/login.html")
+
+
+# 登录页面
+@admin_blu.route('/admin/login.html', methods=["GET", "POST"])
+def login():
+    return render_template("admin/login.html")
+
+
+# 登录功能
+@admin_blu.route('/admin/login', methods=["GET", "POST"])
+def admin_login():
+    # 1. 提取登录时的用户名，密码
+    username = request.json.get("username")
+    password = request.json.get("password")
+    print('------------------------------------------------------------', username, password)
+
+    # 2. 查询，如果存在表示登录成功，否则失败
+    user = db.session.query(User).filter(User.mobile == username, User.password_hash == password).first()
+    if user:
+        ret = {
+            "errno": 0,
+            "errmsg": "登录成功"
+        }
+        session['user_id'] = user.id
+        session['nick_name'] = username
+    else:
+        ret = {
+            "errno": 2001,
+            "errmsg": "用户名或者密码错误"
+        }
+
+    return jsonify(ret)
+
+
+# 退出功能
+@admin_blu.route("/admin/logout")
+def logout():
+    # 清空登录状态
+    session.clear()
+
+    return redirect(url_for('admin_blu.login'))
 
 
 # 用户统计

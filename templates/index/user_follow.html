@@ -18,7 +18,7 @@
         <li class="author_card card_list">
             <a href="#" target="_blank" class="author_pic">
                 {% if user_info.avatar_url %}
-                <img src=".{{ user_info.avatar_url }}" alt="author_pic">
+                <img src="{{ user_info.avatar_url }}" alt="author_pic">
                 {% else %}
                 <img src="/static/index/images/cat.jpg" alt="author_pic">
                 {% endif %}

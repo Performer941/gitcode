@@ -37,8 +37,10 @@ $(function(){
                     // `收藏`成功
                     // 隐藏`收藏`按钮
                     $(".collection").hide();
+                    location.reload();
                     // 显示`已收藏`按钮
                     $(".collected").show();
+                    location.reload();
                 }
                 else if (resp.errno == "5002") {
                     // 用户登录
@@ -80,8 +82,10 @@ $(function(){
                     // `取消收藏`成功
                     // 显示`收藏`按钮
                     $(".collection").show();
+                    location.reload();
                     // 隐藏`已收藏`按钮
                     $(".collected").hide();
+                    location.reload();
                 }
                 else if (resp.errno == "4101") {
                     // 用户登录
@@ -260,6 +264,7 @@ $(function(){
         if(sHandler.indexOf('reply_sub')>=0)
         {
             alert('回复评论');
+            location.reload()
             // 获取参数
             var $this = $(this);
             var news_id = $this.parent().attr('data-news-id');
@@ -366,8 +371,10 @@ $(function(){
                     // `关注`成功
                     // 隐藏`关注`按钮
                     $(".focus").hide();
+                    location.reload();
                     // 显示`已关注`按钮
                     $(".focused").show();
+                    location.reload();
 
                     // 设置页面上作者粉丝数量
                     var count = $(".follows b").html();
@@ -411,8 +418,10 @@ $(function(){
                     // `关注`成功
                     // 显示`关注`按钮
                     $(".focus").show();
+                    location.reload();
                     // 隐藏`已关注`按钮
                     $(".focused").hide();
+                    location.reload();
 
                     // 设置页面上作者粉丝数量
                     var count = $(".follows b").html();
