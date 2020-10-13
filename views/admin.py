@@ -4,6 +4,7 @@ from models.index import User, Category, News
 from flask import render_template, request, jsonify
 
 
+# 主页面
 @admin_blu.route('/admin/index.html')
 def admin_index():
     return render_template("admin/index.html")
@@ -28,7 +29,47 @@ def user_list():
 # 新闻审核
 @admin_blu.route('/admin/news_review.html')
 def news_review():
-    return render_template("admin/news_review.html")
+    page = int(request.args.get("page", 1))
+    paginate = db.session.query(News).order_by(-News.create_time).paginate(page, 5, False)
+
+    return render_template("admin/news_review.html", paginate=paginate)
+
+
+@admin_blu.route("/admin/news_review_detail.html")
+def news_review_detail():
+    # 提取新闻
+    news_id = int(request.args.get("id", 0))
+    news = db.session.query(News).filter(News.id == news_id).first()
+
+    return render_template("admin/news_review_detail.html", news=news)
+
+
+@admin_blu.route("/admin/news_review_detail/<int:news_id>", methods=["POST"])
+def save_news_review_detail(news_id):
+    # 获取新闻
+    news = db.session.query(News).filter(News.id == news_id).first()
+    if not news:
+        # 如果没有这个新闻，就返回error信息
+        return jsonify({
+            "errno": 5003,
+            "errmsg": "未找到对应的新闻"
+        })
+
+    # 提取，审核结果
+    action = request.json.get("action")
+    if action == "accept":
+        news.status = 0
+    else:
+        news.status = -1
+
+    # 保存到数据库
+    db.session.commit()
+
+    # 返回对应信息
+    return jsonify({
+        "errno": 0,
+        "errmsg": "成功"
+    })
 
 
 # 新闻版式编辑
@@ -53,11 +94,12 @@ def news_edit_detail():
     return render_template("admin/news_edit_detail.html", news=news, categorys=categorys)
 
 
+# 新闻编辑完成点击
 @admin_blu.route("/admin/news_edit_detail/<int:news_id>", methods=["POST"])
 def save_news(news_id):
     # 更新新闻
     news = db.session.query(News).filter(News.id == news_id).first()
-    print('-'*50 , news)
+    print('-' * 50, news)
     if not news:
         # 如果没有id，那么就无需保存
         ret = {
