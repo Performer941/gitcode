@@ -12,16 +12,15 @@ def index():
     # 查询用户是否已经登录
     user_id = session.get("user_id", 0)
     user = db.session.query(User).filter(User.id == user_id).first()
+    # 查询分类
+    categorys = db.session.query(Category).filter(Category.id != 1).all()
 
     if user_id:
         nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
     else:
         nick_name = session.get("nick_name", "")
 
-    # 查询分类
-    categorys = db.session.query(Category).filter(Category.id != 1).all()
-
-    return render_template("index/index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name,
+    return render_template("index/index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name, user=user,
                            categorys=categorys)
 
 

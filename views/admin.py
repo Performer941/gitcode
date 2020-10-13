@@ -1,6 +1,6 @@
 from . import admin_blu
 from models import db
-from models.index import User, Category
+from models.index import User, Category, News
 from flask import render_template, request, jsonify
 
 
@@ -34,7 +34,54 @@ def news_review():
 # 新闻版式编辑
 @admin_blu.route('/admin/news_edit.html')
 def news_edit():
-    return render_template("admin/news_edit.html")
+    # 获取当前需要的页数
+    page = int(request.args.get("page", 1))
+    # 创建分页器对象
+    paginate = db.session.query(News).paginate(int(page), 5, False)
+
+    return render_template("admin/news_edit.html", paginate=paginate)
+
+
+# 新闻编辑页面
+@admin_blu.route("/admin/news_edit_detail.html")
+def news_edit_detail():
+    # 查询当前新闻
+    news_id = int(request.args.get("id", 0))
+    news = db.session.query(News).filter(News.id == news_id).first()
+    # 获取新闻可选择的所有列表
+    categorys = db.session.query(Category).filter(Category.id != 1).all()
+    return render_template("admin/news_edit_detail.html", news=news, categorys=categorys)
+
+
+@admin_blu.route("/admin/news_edit_detail/<int:news_id>", methods=["POST"])
+def save_news(news_id):
+    # 更新新闻
+    news = db.session.query(News).filter(News.id == news_id).first()
+    print('-'*50 , news)
+    if not news:
+        # 如果没有id，那么就无需保存
+        ret = {
+            "errno": 5002,
+            "errmsg": "没有对应的新闻"
+        }
+
+        return jsonify(ret)
+
+    news.title = request.form.get("title")
+    news.digest = request.form.get("digest")
+    news.content = request.form.get("content")
+    news.category_id = request.form.get("category_id")
+    index_image_url = request.form.get("index_image_url")
+    if index_image_url:
+        news.index_image_url = index_image_url
+
+    # 将修改的信息写入到数据库，此时真的更新成功
+    db.session.commit()
+    ret = {
+        "errno": 0,
+        "errmsg": "成功"
+    }
+    return jsonify(ret)
 
 
 # 新闻分类管理
