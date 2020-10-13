@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request, session
 from . import index_blu
 from models import db
-from models.index import News, User, Comment
+from models.index import News, User, Comment, Category
 
 
 # 显示新闻页的热点新闻
@@ -12,12 +12,17 @@ def index():
     # 查询用户是否已经登录
     user_id = session.get("user_id", 0)
     user = db.session.query(User).filter(User.id == user_id).first()
+
     if user_id:
         nick_name = db.session.query(User).filter(User.id == user_id).first().nick_name
     else:
         nick_name = session.get("nick_name", "")
 
-    return render_template("index/index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name, user=user)
+    # 查询分类
+    categorys = db.session.query(Category).filter(Category.id != 1).all()
+
+    return render_template("index/index.html", clicks_top_6_news=clicks_top_6_news, nick_name=nick_name,
+                           categorys=categorys)
 
 
 # 从数据库返回主页面新闻数据
@@ -57,7 +62,6 @@ def detail(news_id):
 
     # 查询点击量最多的前6个新闻信息
     clicks_top_6_news = db.session.query(News).order_by(-News.clicks).limit(6)
-
 
     # 查询这个新闻的作者
     news_author = news.user
