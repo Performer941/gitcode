@@ -127,7 +127,7 @@ $(function(){
                     window.location.href='/admin/index.html'
 
                 }else {
-                    alert('账号或密码错误，请重新输入')
+                    alert('检查账号')
                     location.reload()
                     // $("#login-password-err").html(resp.errmsg)
                     // $("#login-password-err").show()

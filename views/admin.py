@@ -21,7 +21,7 @@ def admin_index():
 
 
 # 登录页面
-@admin_blu.route('/admin/login.html', methods=["GET", "POST"])
+@admin_blu.route("/admin", methods=["GET", "POST"])
 def login():
     return render_template("admin/login.html")
 
@@ -35,7 +35,8 @@ def admin_login():
 
     # 2. 查询，如果存在表示登录成功，否则失败
     user = db.session.query(User).filter(User.mobile == username).first()
-    if user and check_password_hash(user.password_hash, password):
+
+    if user and check_password_hash(user.password_hash, password) and user.is_admin:
         ret = {
             "errno": 0,
             "errmsg": "登录成功"
@@ -45,7 +46,7 @@ def admin_login():
     else:
         ret = {
             "errno": 2001,
-            "errmsg": "用户名或者密码错误"
+            # "errmsg": "亲，你不是管理员哟，请py交易开通权限"
         }
 
     return jsonify(ret)
