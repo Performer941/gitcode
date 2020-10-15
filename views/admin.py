@@ -1,3 +1,8 @@
+from datetime import datetime, timedelta
+
+from sqlalchemy import extract
+from werkzeug.security import check_password_hash
+
 from . import admin_blu
 from models import db
 from models.index import User, Category, News
@@ -27,11 +32,10 @@ def admin_login():
     # 1. 提取登录时的用户名，密码
     username = request.json.get("username")
     password = request.json.get("password")
-    print('------------------------------------------------------------', username, password)
 
     # 2. 查询，如果存在表示登录成功，否则失败
-    user = db.session.query(User).filter(User.mobile == username, User.password_hash == password).first()
-    if user:
+    user = db.session.query(User).filter(User.mobile == username).first()
+    if user and check_password_hash(user.password_hash, password):
         ret = {
             "errno": 0,
             "errmsg": "登录成功"
@@ -59,7 +63,49 @@ def logout():
 # 用户统计
 @admin_blu.route('/admin/user_count.html')
 def user_count():
-    return render_template("admin//user_count.html")
+    # 查询总数
+    total_count = db.session.query(User).count()
+    # 统计当月用户的新增数量
+    now_date = datetime.now()
+    year = now_date.year
+    month = now_date.month
+    month_count = db.session.query(User).filter(extract('year', User.create_time) == year,
+                                                extract('month', User.create_time) == month).count()
+
+    # 统计当天用户的新增数量
+    day = now_date.day
+    day_count = db.session.query(User).filter(extract('year', User.create_time) == year,
+                                              extract('month', User.create_time) == month,
+                                              extract('day', User.create_time) == day).count()
+
+    # 计算出近30天的数据
+    counts_li = []
+    date_li = []
+    begin_date = now_date - timedelta(days=29)
+
+    for i in range(0, 30):
+        # 计算当前日期
+        cur_date = begin_date + timedelta(days=i)
+
+        # 获取当前日期的年月日
+        year = cur_date.year
+        month = cur_date.month
+        day = cur_date.day
+
+        # 计算出当天新增用户数量
+        count = db.session.query(User).filter(extract('year', User.last_login) == year,
+                                              extract('month', User.last_login) == month,
+                                              extract('day', User.last_login) == day).count()
+
+        # 把当天新增用户数量保存在counts_li列表中
+        counts_li.append(count)
+
+        # 保存当前日期
+        date_str = cur_date.strftime('%Y-%m-%d')
+        date_li.append(date_str)
+
+    return render_template("admin/user_count.html", total_count=total_count, month_count=month_count,
+                           day_count=day_count, counts_li=counts_li, date_li=date_li)
 
 
 # 用户列表

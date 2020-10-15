@@ -54,6 +54,7 @@ def category_news():
     return jsonify(ret)
 
 
+# 详情页面
 @index_blu.route("/detail/<int:news_id>")
 def detail(news_id):
     # 根据news_id查询这个新闻的详情
@@ -71,14 +72,19 @@ def detail(news_id):
     user_id = session.get("user_id", 0)
     nick_name = session.get("nick_name", "")
 
-    if user_id:
+    # 获取评论
+    comments = news.comments.order_by(-Comment.create_time)
+
+    # 获取用户对象
+    user = db.session.query(User).filter(User.id == user_id).first()
+
+    if user:
         # 计算当前登录用户是否已经关注了这个新闻的作者
         news_author_followers_id = [x.id for x in news_author.followers]
         if user_id in news_author_followers_id:
             news_author.can_follow = False  # 已经关注了作者，就不能在关注了
         else:
             news_author.can_follow = True  # 可以关注
-
         # 计算当前用户是否收藏了这个篇文章
         news_collected_user_id = [x.id for x in news.collected_user]
         if user_id in news_collected_user_id:
@@ -86,15 +92,13 @@ def detail(news_id):
         else:
             news.can_collect = True  # 可以收藏
 
-        # 获取评论
-        comments = news.comments.order_by(-Comment.create_time)
-
         # 获取用户对象
         user = db.session.query(User).filter(User.id == user_id).first()
         like_comment = user.like_comment
-
         return render_template("index/detail.html", news=news, nick_name=nick_name, news_author=news_author,
                                clicks_top_6_news=clicks_top_6_news, comments=comments,
                                like_comment=like_comment, user=user)
     else:
-        return '请先登录'
+        return render_template("index/detail.html", news=news, nick_name=nick_name, news_author=news_author,
+                               clicks_top_6_news=clicks_top_6_news, comments=comments,
+                               user=user)

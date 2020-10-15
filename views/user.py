@@ -110,6 +110,15 @@ def user_basic():
     nick_name = request.json.get("nick_name")
     signature = request.json.get("signature")
     gender = request.json.get("gender")
+    user_info = db.session.query(User).all()
+
+    for i in user_info:
+        if i.nick_name == nick_name:
+            ret = {
+                'errno': 4399,
+                'errmsg': '昵称以存在'
+            }
+            return ret
 
     # 获取当前用户的信息
     user_id = session.get("user_id")

@@ -159,15 +159,17 @@
             <a href="javascript:;" class="shutoff"></a>
         </div>
         <div class="form_group">
-            <input type="text" name="username" autocomplete="off">
-            <div class="input_tip">用户名/手机号</div>
+            <input id="mobile" type="text" name="mobile" autocomplete="off">
+            <div class="input_tip">手机号</div>
+            <div id="login-mobile-err" class="error_tip">手机号不能为空</div>
         </div>
         <div class="form_group">
-            <input type="password" name="password">
+            <input id="password" type="password" name="password">
             <div class="input_tip">密码(不少于6位)</div>
+            <div id="login-password-err" class="error_tip">密码不能为空</div>
         </div>
         <input type="submit" name="" value="登 录" class="input_sub">
-        <div class="down_link">还没有账号？<a href="#" class="to_register">立即注册</a></div>
+        <div class="down_link">还没有账号？<a href="javascript:;" class="to_register">立即注册</a></div>
     </div>
     <div class="mask"></div>
 </form>
