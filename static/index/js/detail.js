@@ -37,7 +37,6 @@ $(function(){
                     // `收藏`成功
                     // 隐藏`收藏`按钮
                     $(".collection").hide();
-                    location.reload();
                     // 显示`已收藏`按钮
                     $(".collected").show();
                     location.reload();
@@ -82,7 +81,6 @@ $(function(){
                     // `取消收藏`成功
                     // 显示`收藏`按钮
                     $(".collection").show();
-                    location.reload();
                     // 隐藏`已收藏`按钮
                     $(".collected").hide();
                     location.reload();
@@ -371,7 +369,6 @@ $(function(){
                     // `关注`成功
                     // 隐藏`关注`按钮
                     $(".focus").hide();
-                    location.reload();
                     // 显示`已关注`按钮
                     $(".focused").show();
                     location.reload();
@@ -418,7 +415,6 @@ $(function(){
                     // `关注`成功
                     // 显示`关注`按钮
                     $(".focus").show();
-                    location.reload();
                     // 隐藏`已关注`按钮
                     $(".focused").hide();
                     location.reload();

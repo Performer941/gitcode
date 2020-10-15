@@ -10,7 +10,7 @@ from flask import render_template, request, jsonify, redirect, url_for, session
 
 
 # 主页面
-@admin_blu.route('/admin/index.html')
+@admin_blu.route('/index.html')
 def admin_index():
     user_id = session.get("user_id", 0)
     user = db.session.query(User).filter(User.id == user_id).first()
@@ -21,13 +21,13 @@ def admin_index():
 
 
 # 登录页面
-@admin_blu.route("/admin", methods=["GET", "POST"])
+@admin_blu.route("", methods=["GET", "POST"])
 def login():
     return render_template("admin/login.html")
 
 
 # 登录功能
-@admin_blu.route('/admin/login', methods=["GET", "POST"])
+@admin_blu.route('login', methods=["GET", "POST"])
 def admin_login():
     # 1. 提取登录时的用户名，密码
     username = request.json.get("username")
@@ -46,14 +46,14 @@ def admin_login():
     else:
         ret = {
             "errno": 2001,
-            # "errmsg": "亲，你不是管理员哟，请py交易开通权限"
+            "errmsg": "亲，你不是管理员哟"
         }
 
     return jsonify(ret)
 
 
 # 退出功能
-@admin_blu.route("/admin/logout")
+@admin_blu.route("/logout")
 def logout():
     # 清空登录状态
     session.clear()
@@ -62,7 +62,7 @@ def logout():
 
 
 # 用户统计
-@admin_blu.route('/admin/user_count.html')
+@admin_blu.route('/user_count.html')
 def user_count():
     # 查询总数
     total_count = db.session.query(User).count()
@@ -110,7 +110,7 @@ def user_count():
 
 
 # 用户列表
-@admin_blu.route('/admin/user_list.html')
+@admin_blu.route('/user_list.html')
 def user_list():
     # 获取当前需要的页数
     page = int(request.args.get("page", 1))
@@ -120,7 +120,7 @@ def user_list():
 
 
 # 新闻审核
-@admin_blu.route('/admin/news_review.html')
+@admin_blu.route('/news_review.html')
 def news_review():
     page = int(request.args.get("page", 1))
     paginate = db.session.query(News).order_by(-News.create_time).paginate(page, 5, False)
@@ -128,7 +128,7 @@ def news_review():
     return render_template("admin/news_review.html", paginate=paginate)
 
 
-@admin_blu.route("/admin/news_review_detail.html")
+@admin_blu.route("/news_review_detail.html")
 def news_review_detail():
     # 提取新闻
     news_id = int(request.args.get("id", 0))
@@ -137,7 +137,7 @@ def news_review_detail():
     return render_template("admin/news_review_detail.html", news=news)
 
 
-@admin_blu.route("/admin/news_review_detail/<int:news_id>", methods=["POST"])
+@admin_blu.route("/news_review_detail/<int:news_id>", methods=["POST"])
 def save_news_review_detail(news_id):
     # 获取新闻
     news = db.session.query(News).filter(News.id == news_id).first()
@@ -166,7 +166,7 @@ def save_news_review_detail(news_id):
 
 
 # 新闻版式编辑
-@admin_blu.route('/admin/news_edit.html')
+@admin_blu.route('/news_edit.html')
 def news_edit():
     # 获取当前需要的页数
     page = int(request.args.get("page", 1))
@@ -177,7 +177,7 @@ def news_edit():
 
 
 # 新闻编辑页面
-@admin_blu.route("/admin/news_edit_detail.html")
+@admin_blu.route("/news_edit_detail.html")
 def news_edit_detail():
     # 查询当前新闻
     news_id = int(request.args.get("id", 0))
@@ -188,7 +188,7 @@ def news_edit_detail():
 
 
 # 新闻编辑完成点击
-@admin_blu.route("/admin/news_edit_detail/<int:news_id>", methods=["POST"])
+@admin_blu.route("/news_edit_detail/<int:news_id>", methods=["POST"])
 def save_news(news_id):
     # 更新新闻
     news = db.session.query(News).filter(News.id == news_id).first()
@@ -220,14 +220,14 @@ def save_news(news_id):
 
 
 # 新闻分类管理
-@admin_blu.route('/admin/news_type.html')
+@admin_blu.route('/news_type.html')
 def news_type():
     news_types = db.session.query(Category).filter(Category.id != 1).all()
     return render_template("admin/news_type.html", news_types=news_types)
 
 
 # 新闻分类管理功能
-@admin_blu.route("/admin/news_type", methods=["POST"])
+@admin_blu.route("/news_type", methods=["POST"])
 def news_type_edit():
     # 提取参数
     category_id = request.json.get("id")

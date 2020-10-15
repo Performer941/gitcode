@@ -6,7 +6,7 @@ from models.index import User, Collection, Comment, CommentLike
 from . import news_blu
 
 
-@news_blu.route("/news/collect", methods=["POST"])
+@news_blu.route("/collect", methods=["POST"])
 def news_collect():
     # 1. 提取参数
     news_id = request.json.get("news_id")
@@ -52,7 +52,7 @@ def news_collect():
     return jsonify(ret)
 
 
-@news_blu.route("/news/comment", methods=["POST"])
+@news_blu.route("/comment", methods=["POST"])
 def news_comment():
     # 1 提取出用户评价时得数据
     content = request.json.get("content")
@@ -76,7 +76,7 @@ def news_comment():
     return jsonify(ret)
 
 
-@news_blu.route("/news/comment_like", methods=["POST"])
+@news_blu.route("/comment_like", methods=["POST"])
 def comment_like():
     action = request.json.get("action")
     comment_id = request.json.get("comment_id")

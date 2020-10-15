@@ -11,7 +11,7 @@ import os
 
 
 # 用户关注功能
-@user_blu.route("/user/follow", methods=["POST"])
+@user_blu.route("/follow", methods=["POST"])
 def follow():
     action = request.json.get("action")
     # 提取到if前面，以便在if或者else中都可以使用
@@ -84,7 +84,7 @@ def follow():
 
 
 # 防止未登录用户查看信息
-@user_blu.route("/user/center")
+@user_blu.route("/center")
 def user_center():
     user_id = session.get("user_id")
     user = db.session.query(User).filter(User.id == user_id).first()
@@ -98,13 +98,13 @@ def user_center():
 
 
 # 显示修改用户信息视图
-@user_blu.route("/user/user_base_info")
+@user_blu.route("/user_base_info")
 def user_base_info():
     return render_template("index/user_base_info.html")
 
 
 # 修改用户信息功能
-@user_blu.route("/user/basic", methods=["POST"])
+@user_blu.route("/basic", methods=["POST"])
 def user_basic():
     # 获取用户的新的信息
     nick_name = request.json.get("nick_name")
@@ -148,13 +148,13 @@ def user_basic():
 
 
 # 显示修改用户密码视图
-@user_blu.route("/user/user_pass_info")
+@user_blu.route("/user_pass_info")
 def user_pass_info():
     return render_template("index/user_pass_info.html")
 
 
 # 显示修改用户密码功能
-@user_blu.route("/user/password", methods=["POST"])
+@user_blu.route("/password", methods=["POST"])
 def user_password():
     # 1. 提取旧密码以及新密码
     new_password = request.json.get("new_password")
@@ -191,14 +191,14 @@ def user_password():
     return jsonify(ret)
 
 
-@user_blu.route("/user/user_pic_info.html")
+@user_blu.route("/user_pic_info.html")
 def user_pic_info():
     user_id = session.get("user_id")
     user = db.session.query(User).filter(User.id == user_id).first()
     return render_template("index/user_pic_info.html", user=user)
 
 
-@user_blu.route("/user/avatar", methods=["POST"])
+@user_blu.route("/avatar", methods=["POST"])
 def user_avatar():
     f = request.files.get("avatar")
     if f:
@@ -237,7 +237,7 @@ def user_avatar():
 
 # # 方法二
 # # 修改用户头像功能
-# @user_blu.route("/user/avatar", methods=["POST"])
+# @user_blu.route("/avatar", methods=["POST"])
 # def user_avatar():
 #     # 1.提取新头像
 #     new_avatar = request.files.get("avatar")
@@ -281,7 +281,7 @@ def user_avatar():
 #
 #
 # # 获取用户头像
-# @user_blu.route("/user/img_path", methods=["GET", "POST"])
+# @user_blu.route("/img_path", methods=["GET", "POST"])
 # def img_path():
 #     # 从session获取用户id
 #     user_id = session.get('user_id')
@@ -300,7 +300,7 @@ def user_avatar():
 
 
 # 显示用户查看粉丝及功能
-@user_blu.route("/user/user_follow")
+@user_blu.route("/user_follow")
 def user_follow():
     # 获取用户id
     user_id = session.get("user_id")
@@ -320,7 +320,7 @@ def user_follow():
 
 
 # 显示用户查看我的收藏视图
-@user_blu.route("/user/user_collection")
+@user_blu.route("/user_collection")
 def user_collection():
     # 查询用户
     user_id = session.get("user_id")
@@ -336,7 +336,7 @@ def user_collection():
 
 
 # 显示新闻发布视图
-@user_blu.route("/user/user_news_release.html")
+@user_blu.route("/user_news_release.html")
 def user_news_release():
     # 查询出分类name，但不包括最新新闻
     category_list = db.session.query(Category).filter(Category.id != 1).all()
@@ -344,7 +344,7 @@ def user_news_release():
 
 
 # 新闻发布功能
-@user_blu.route("/user/release", methods=["POST"])
+@user_blu.route("/release", methods=["POST"])
 def new_release():
     # 获取news表中数据
     title = request.form.get("title")
@@ -392,7 +392,7 @@ def new_release():
 
 
 # 显示新闻列表视图
-@user_blu.route("/user/user_news_list.html")
+@user_blu.route("/user_news_list.html")
 def user_news_list():
     # 查询当前用户
     user_id = session.get("user_id")
