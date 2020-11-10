@@ -23,7 +23,7 @@ def send_msg_to_phone(phone_num, verify_number):
     request.add_query_param('RegionId', "cn-hangzhou")
     request.add_query_param('PhoneNumbers', phone_num)
     request.add_query_param('SignName', "新经资讯网页")
-    request.add_query_param('TemplateCode', "SMS_204296271")
+    request.add_query_param('TemplateCode', "SMS_xxxxxxx")
     request.add_query_param('TemplateParam', "{\"code\":\"%s\"}" % verify_number)
 
     response = client.do_action(request)
@@ -32,4 +32,4 @@ def send_msg_to_phone(phone_num, verify_number):
 
 
 if __name__ == '__main__':
-    send_msg_to_phone("13202127926", "324621")
+    send_msg_to_phone("手机号码", "短信内容")
