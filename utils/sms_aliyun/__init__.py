@@ -10,7 +10,7 @@ def send_msg_to_phone(phone_num, verify_number):
     :return:
     """
 
-    client = AcsClient('LTAI4G8dNVsymRfFWnuRhFNf', 'PRTBLQ2rxLGsdam6h21X5bJO3jb93A', 'cn-hangzhou')
+    client = AcsClient('短信密钥', '短信密钥', 'cn-hangzhou')
 
     request = CommonRequest()
     request.set_accept_format('json')
